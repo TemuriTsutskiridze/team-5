@@ -11,25 +11,19 @@ export default function FeedBackCardSpace({
 }) {
   const { isMobile, isTablet, isDesktop } = useScreenType();
 
-  const filteredProductRequests =
-    selectedFilter === "all"
-      ? productRequests
-      : productRequests.filter(
-          (feedback) => feedback.status === selectedFilter
-        );
+  // Filter productRequests based on selectedFilter
+  const filteredProductRequests = productRequests.filter(
+    (feedback) => selectedFilter === "all" || feedback.status === selectedFilter
+  );
 
-  const displayFilter =
-    selectedFilter.charAt(0).toUpperCase() + selectedFilter.slice(1);
-
-  const plannedRequests = productRequests.filter(
-    (request) => request.status === "planned"
-  );
-  const inProgressRequests = productRequests.filter(
-    (request) => request.status === "in-progress"
-  );
-  const liveRequests = productRequests.filter(
-    (request) => request.status === "live"
-  );
+  // Map the status to its corresponding requests
+  const statusToRequestsMap = {
+    planned: productRequests.filter((request) => request.status === "planned"),
+    "in-progress": productRequests.filter(
+      (request) => request.status === "in-progress"
+    ),
+    live: productRequests.filter((request) => request.status === "live"),
+  };
 
   return (
     <>
@@ -37,11 +31,11 @@ export default function FeedBackCardSpace({
         {isMobile && selectedFilter !== "all" && (
           <StatusInfoTitle>
             <h2>
-              {displayFilter}{" "}
+              {selectedFilter}{" "}
               <span>
-                {displayFilter === "all"
+                {selectedFilter === "all"
                   ? ""
-                  : "(" + getCountByStatus(displayFilter) + ")"}
+                  : "(" + getCountByStatus(selectedFilter) + ")"}
               </span>
             </h2>
             <p>Features currently being developed</p>
@@ -52,26 +46,26 @@ export default function FeedBackCardSpace({
           <CardsContainer>
             <FeedbackColumn
               getCountByStatus={getCountByStatus}
-              filteredProductRequests={plannedRequests}
+              filteredProductRequests={statusToRequestsMap["planned"]}
               setData={setData}
               status="planned"
             />
             <FeedbackColumn
               getCountByStatus={getCountByStatus}
-              filteredProductRequests={inProgressRequests}
+              filteredProductRequests={statusToRequestsMap["in-progress"]}
               setData={setData}
               status="in-progress"
             />
             <FeedbackColumn
               getCountByStatus={getCountByStatus}
-              filteredProductRequests={liveRequests}
+              filteredProductRequests={statusToRequestsMap["live"]}
               setData={setData}
               status="live"
             />
           </CardsContainer>
         )}
         {isMobile &&
-          productRequests.map((feedback) => {
+          filteredProductRequests.map((feedback) => {
             if (feedback.status !== "suggestion") {
               return (
                 <FeedbackCard
