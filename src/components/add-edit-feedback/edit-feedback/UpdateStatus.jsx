@@ -5,8 +5,8 @@ import React, { useState, useRef, useEffect } from "react";
 import ArrowDown from "/assets/shared/icon-arrow-down.svg";
 import CheckIcon from "/assets/shared/icon-check.svg";
 
-export default function UpdateStatus() {
-  const allStatuses = ["Suggestion", "Planned", "In-progress", "Live"];
+export default function UpdateStatus({ setValue }) {
+  const allStatuses = ["suggestion", "planned", "in-progress", "live"];
 
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState(allStatuses[0]); // prev. selected feature should be here
@@ -28,8 +28,8 @@ export default function UpdateStatus() {
 
   const handleSelection = (option) => {
     setSelectedOption(option);
-    onSelectCategory(option); // pass selected option to parent's handler
     setIsOpen(false);
+    setValue("status", option);
   };
 
   return (

@@ -50,9 +50,9 @@ export default function NewFeedback() {
     });
     navigate("/feedbacks");
 
-    console.log("Form submitted:", formData);
-    console.log("New feedback item:", newFeedbackItem);
-    console.log("Updated data:", data);
+    // console.log("Form submitted:", formData);
+    // console.log("New feedback item:", newFeedbackItem);
+    // console.log("Updated data:", data);
   };
 
   return (

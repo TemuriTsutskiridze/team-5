@@ -1,17 +1,30 @@
 import styled from "styled-components";
 import { MyContext } from "../../../../App";
 import { useContext } from "react";
+import { useLocation } from "react-router";
+import { useParams } from "react-router";
+
 export default function CancelButton() {
+  const pathname = useLocation().pathname.split("/").at(-1);
+  const params = useParams();
+  const id = params.id;
+
   const context = useContext(MyContext);
   return (
     <CancelButtonComponent
-      onClick={() => context.navigate("/feedbacks")}
-      type="delete"
-    >
+      onClick={() => {
+        if (pathname === "edit-feedback") {
+          context.navigate(`/feedbacks/${params.id}`);
+        } else {
+          context.navigate(`/feedbacks`);
+        }
+      }}>
       Cancel
     </CancelButtonComponent>
   );
 }
+
+// context.navigate(`/feedbacks/${params.id}`)}
 
 const CancelButtonComponent = styled.button`
   background: rgba(58, 67, 116, 1);

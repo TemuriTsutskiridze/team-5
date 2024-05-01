@@ -4,9 +4,13 @@ import { MyContext } from "../App";
 function Feedback() {
   const context = useContext(MyContext);
   const params = useParams();
+  let productRequests = context.data.productRequests;
   const id = params.id;
+  const map0 = new Map(Object.entries(context.data));
+  const map1 = new Map(Object.entries(context.data.productRequests[id - 1]));
+
   const choosen = context.data.productRequests[id - 1];
-  const choosenClon = choosen;
+  const choosenClon = { ...choosen };
 
   let commentsAmout = 0;
   if (choosen.comments) {
@@ -22,9 +26,12 @@ function Feedback() {
 
   const [commentValue, setCommentValue] = useState();
   const [charLength, setCharLength] = useState("250");
-  const [commentError, setCommentError] = useState(false);
+  const [commentError, setCommentError] = useState(true);
   const [countId, setCountId] = useState(16);
 
+  const handleChange = (e) => {
+    handleComment(e), inputHandler();
+  };
   const handleComment = (e) => {
     if (charLength > 0) {
       setCommentValue(e.target.value);
@@ -33,28 +40,45 @@ function Feedback() {
       setCharLength(charLength);
     }
   };
+  const inputHandler = () => {
+    if (charLength == "250") {
+      setCommentError(true);
+    } else {
+      setCommentError(false);
+    }
+  };
+
+  // console.log(commentError);
+  // console.log(charLength);
 
   const commentPost = () => {
-    if (charLength == "250") {
-      setCommentError(!commentError);
-    }
     if (!Array.isArray(choosenClon.comments)) {
       choosenClon.comments = [];
     }
-    choosenClon.comments.push({
-      id: countId,
-      content: commentValue,
-      user: {
-        image: "/assets/user-images/image-zena.jpg",
-        name: "Zena Kelley",
-        username: "velvetround",
-      },
-    });
-    setCountId(countId + 1);
-    context.setData(
-      ([...[...context.data.productRequests][id - 1]].comments =
-        choosenClon.comments)
-    );
+    if (!commentError) {
+      choosenClon.comments.push({
+        id: countId,
+        content: commentValue,
+        user: {
+          image: "/assets/user-images/image-zena.jpg",
+          name: "Zena Kelley",
+          username: "velvetround",
+        },
+      });
+      setCountId(countId + 1);
+      map1.set("comments", choosenClon.comments);
+
+      const updatedObj = Object.fromEntries(map1);
+      productRequests = [...productRequests][id - 1] = updatedObj;
+      // console.log(productRequests);
+      map0.set("productRequests", productRequests);
+      const updatedData = Object.fromEntries(map0);
+      // context.setData(updatedData);
+      // console.log(context.data);
+      setCommentValue("");
+      setCommentError(true);
+      setCharLength(250);
+    }
   };
   return (
     <div className="bg-[#f7f8fd] flex flex-col items-center gap-6">
@@ -255,7 +279,7 @@ function Feedback() {
         </h1>
         <div className="flex flex-col gap-1">
           <textarea
-            onChange={handleComment}
+            onChange={handleChange}
             className={`${
               commentError && charLength > 249
                 ? "border border-solid border-[#d73737]"

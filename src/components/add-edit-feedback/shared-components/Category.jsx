@@ -6,13 +6,12 @@ import ArrowDown from "/assets/shared/icon-arrow-down.svg";
 import CheckIcon from "/assets/shared/icon-check.svg";
 import { MyContext } from "../../../App";
 import { useContext } from "react";
+import { useLocation } from "react-router";
 
-export default function Category({ setValue }) {
-  const context = useContext(MyContext);
-  const data = context.data;
-  const setData = context.setData;
+export default function Category({ setValue, category }) {
+  const pathname = useLocation().pathname.split("/").at(-1);
 
-  const allCategories = ["Feature", "UI", "UX", "Enhancement", "Bug", "Other"];
+  const allCategories = ["feature", "UI", "UX", "enhancement", "bug", "Other"];
 
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState(allCategories[0]);
@@ -26,6 +25,10 @@ export default function Category({ setValue }) {
       }
     };
 
+    if (pathname === "edit-feedback") {
+      setSelectedOption(category);
+    }
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
@@ -36,7 +39,6 @@ export default function Category({ setValue }) {
     setSelectedOption(option);
     setIsOpen(false);
     setValue("category", option);
-    console.log(option);
   };
 
   return (
