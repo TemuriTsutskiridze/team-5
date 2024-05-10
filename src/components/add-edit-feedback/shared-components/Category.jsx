@@ -6,13 +6,12 @@ import ArrowDown from "/assets/shared/icon-arrow-down.svg";
 import CheckIcon from "/assets/shared/icon-check.svg";
 import { MyContext } from "../../../App";
 import { useContext } from "react";
+import { useLocation } from "react-router";
 
-export default function Category() {
-  const context = useContext(MyContext);
-  const data = context.data;
-  const setData = context.setData;
+export default function Category({ setValue, category }) {
+  const pathname = useLocation().pathname.split("/").at(-1);
 
-  const allCategories = ["Feature", "UI", "UX", "Enhancement", "Bug", "Other"];
+  const allCategories = ["feature", "UI", "UX", "enhancement", "bug", "Other"];
 
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState(allCategories[0]);
@@ -26,16 +25,20 @@ export default function Category() {
       }
     };
 
+    if (pathname === "edit-feedback") {
+      setSelectedOption(category);
+    }
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const toggleDropdown = () => setIsOpen(!isOpen);
+  const toggleDropdown = () => setIsOpen((state) => !state);
 
   const handleSelection = (option) => {
     setSelectedOption(option);
-    onSelectCategory(option); // pass selected option to parent's handler
     setIsOpen(false);
+    setValue("category", option);
   };
 
   return (
@@ -52,8 +55,7 @@ export default function Category() {
             {allCategories.map((option, index) => (
               <DropdownOption
                 key={index}
-                onClick={() => handleSelection(option)}
-              >
+                onClick={() => handleSelection(option)}>
                 {option}
                 {option === selectedOption && (
                   <img src={CheckIcon} alt="Checked" />

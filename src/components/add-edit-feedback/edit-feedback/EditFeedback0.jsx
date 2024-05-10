@@ -8,45 +8,116 @@ import BtnContainer from "../shared-components/buttons/BtnContainer";
 import UpdateStatus from "./UpdateStatus";
 import AddButton from "../shared-components/buttons/AddBtn";
 import CancelButton from "../shared-components/buttons/CancelBtn";
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { MyContext } from "../../../App";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
+import React, { useCallback } from "react";
+import { useLocation } from "react-router-dom";
+import { useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function EditFeedback() {
   const { navigate, setData, data } = useContext(MyContext);
+
+  // find id of currently clicked feedback
+  const currFeedbackId = useLocation().pathname.split("/")[2];
+
+  // find all of the current feedback's content
+  const currentFeedback = data.productRequests.find(
+    (item) => item.id === Number(currFeedbackId)
+  );
+
+  const category = currentFeedback.category;
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm();
+    setValue,
+    reset,
+    watch,
+  } = useForm({
+    defaultValues: {
+      id: currentFeedback.id,
+      title: currentFeedback.title,
+      category: currentFeedback.category,
+      upvotes: currentFeedback.upvotes,
+      status: currentFeedback.status,
+      description: currentFeedback.description,
+      comments: currentFeedback.comments,
+    },
+  });
+
+  useEffect(() => {
+    reset(
+      {
+        id: currentFeedback.id,
+        "feedback-title": currentFeedback.title,
+        category: currentFeedback.category,
+        upvotes: currentFeedback.upvotes,
+        status: currentFeedback.status,
+        "feedback-comment": currentFeedback.description,
+        comments: currentFeedback.comments,
+      }
+      // { keepDefaultValues: false }
+    );
+  }, []);
 
   const onSubmit = (formData) => {
     const newFeedbackItem = {
-      id: data.productRequests.length + 1,
-      title: formData["feedback-title"],
+      id: formData.id,
+      title: watch("feedback-title"),
       category: formData.category,
-      upvotes: 0,
-      status: "suggestion",
-      description: formData["feedback-comment"],
-      comments: [],
+      upvotes: formData.upvotes,
+      status: formData.status,
+      description: watch("feedback-comment"),
+      comments: formData.comments,
     };
 
+    const feedbackIndex = data.productRequests.indexOf(currentFeedback);
+
     setData((prevData) => {
+      const newProductRequests = [
+        ...prevData.productRequests.slice(0, feedbackIndex),
+        newFeedbackItem,
+        ...prevData.productRequests.slice(feedbackIndex + 1),
+      ];
+
       return {
         ...prevData,
-        productRequests: [...prevData.productRequests, newFeedbackItem],
+        productRequests: newProductRequests,
       };
     });
     navigate("/feedbacks");
 
-    console.log("Form submitted:", formData);
-    console.log("New feedback item:", newFeedbackItem);
-    console.log("Updated data:", data);
+    // console.log("Form submitted:", formData);
+    // console.log("New feedback item:", newFeedbackItem);
+    // console.log("Updated data:", data);
+  };
+
+  const handleDelete = (feedbackId) => {
+    const isConfirmed = window.confirm(
+      "Are you sure you want to delete this feedback?"
+    );
+    if (isConfirmed) {
+      setData((prevData) => {
+        return {
+          ...prevData,
+          productRequests: prevData.productRequests.filter(
+            (item) => item.id !== feedbackId
+          ),
+        };
+      });
+      navigate("/feedbacks");
+      // toast.success("Feedback deleted successfully!"); // not working.
+    }
   };
 
   return (
     <FeedbackContainer>
+      {/* <ToastContainer position="top-center" autoClose={3000} /> */}
+
       <Header>
         {" "}
         <GoBack />
@@ -61,15 +132,16 @@ export default function EditFeedback() {
           />
           <h1 id="form-title">Create New Feedback</h1>
           <FeedbackTitle register={register} errors={errors} />
-          <Category />
-          <UpdateStatus />
-          {/* here should be the value of previous feedback*/}
+          <Category setValue={setValue} category={category} />
+          <UpdateStatus setValue={setValue} />
           <FdbckComment register={register} errors={errors} />
           <BtnContainer>
             <div className="buttons-flex-group"></div>
             <AddButton>Save Changes</AddButton>
             <CancelButton />
-            <DeleteButton>Delete</DeleteButton>
+            <DeleteButton onClick={() => handleDelete(currentFeedback.id)}>
+              Delete
+            </DeleteButton>
           </BtnContainer>
         </Form>
       </Main>

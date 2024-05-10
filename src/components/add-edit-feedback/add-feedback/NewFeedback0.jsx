@@ -10,25 +10,39 @@ import CancelButton from "../shared-components/buttons/CancelBtn";
 import { useForm } from "react-hook-form";
 import { MyContext } from "../../../App";
 import { useContext } from "react";
+// import uuid from "react-uuid";
 
 export default function NewFeedback() {
+  // const id = uuid();
+
   const { navigate, setData, data } = useContext(MyContext);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm();
+    setValue,
+  } = useForm({
+    defaultValues: {
+      category: "Feature",
+      comments: [],
+      description: "",
+      id: "",
+      status: "suggestion",
+      title: "",
+      upvote: 0,
+    },
+  });
 
   const onSubmit = (formData) => {
     const newFeedbackItem = {
-      id: data.productRequests.length + 1,
-      title: formData["feedback-title"],
       category: formData.category,
-      upvotes: 0,
-      status: "suggestion",
-      description: formData["feedback-comment"],
       comments: [],
+      description: formData["feedback-comment"],
+      id: Math.random(),
+      status: "suggestion",
+      title: formData["feedback-title"],
+      upvotes: 0,
     };
 
     setData((prevData) => {
@@ -39,9 +53,9 @@ export default function NewFeedback() {
     });
     navigate("/feedbacks");
 
-    console.log("Form submitted:", formData);
-    console.log("New feedback item:", newFeedbackItem);
-    console.log("Updated data:", data);
+    // console.log("Form submitted:", formData);
+    // console.log("New feedback item:", newFeedbackItem);
+    // console.log("Updated data:", data);
   };
 
   return (
@@ -60,7 +74,7 @@ export default function NewFeedback() {
           />
           <h1 id="form-title">Create New Feedback</h1>
           <FeedbackTitle register={register} errors={errors} />
-          <Category />
+          <Category setValue={setValue} />
           <FdbckComment register={register} errors={errors} />
           <BtnContainer>
             <AddButton>Add Feedback</AddButton>
